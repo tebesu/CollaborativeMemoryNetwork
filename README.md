@@ -18,6 +18,11 @@ python pretrain.py --gpu 0 --dataset data/citeulike-a.npz --output pretrain/cite
 ```
 
 
+**Requirements**
+* Python 3.6
+* TensorFlow 1.4+
+* dm-sonnet
+
 
 ## Data Format
 The structure of the data in the npz file is as follows:

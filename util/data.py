@@ -76,51 +76,6 @@ class Dataset(object):
                 idx += 1
 
     def get_data(self, batch_size, neighborhood, neg_count):
-
-        self._generate_data(neg_count)
-        # Allocate inputs
-        pos_neighbor = np.zeros((batch_size, self._max_user_neighbors), dtype=np.int32)
-        pos_length = np.zeros(batch_size, dtype=np.int32)
-        neg_neighbor = np.zeros((batch_size, self._max_user_neighbors), dtype=np.int32)
-        neg_length = np.zeros(batch_size, dtype=np.int32)
-
-        # Shuffle index
-        np.random.shuffle(self._examples)
-
-        batch_count = int(np.ceil((self.train_size * neg_count) / batch_size))
-
-        for batch_idx in range(batch_count):
-            lo = batch_idx * batch_size
-            hi = lo + batch_size
-            if neighborhood:
-                for idx, (_, item_idx, neg_item_idx) in enumerate(self._examples[lo:hi]):
-                    # Get neighborhood information
-                    if len(self.item_users[item_idx]) > 0:
-                        pos_length[idx] = len(self.item_users[item_idx])
-                        pos_neighbor[idx, :pos_length[idx]] = self.item_users_list[item_idx]
-                    else:
-                        # Length defaults to 1
-                        pos_length[idx] = 1
-                        pos_neighbor[idx, 0] = item_idx
-
-                    if len(self.item_users[neg_item_idx]) > 0:
-                        neg_length[idx] = len(self.item_users[neg_item_idx])
-                        neg_neighbor[idx, :neg_length[idx]] = self.item_users_list[neg_item_idx]
-                    else:
-                        # Length defaults to 1
-                        neg_length[idx] = 1
-                        neg_neighbor[idx, 0] = neg_item_idx
-
-                max_length = max(neg_length.max(), pos_length.max())
-                yield self._examples[lo:hi], pos_neighbor[:, :max_length], pos_length, \
-                      neg_neighbor[:, :max_length], neg_length
-                pos_length[:] = 1
-                neg_length[:] = 1
-            else:
-                yield self._examples[lo:hi]
-
-
-    def get_data(self, batch_size, neighborhood, neg_count):
         # Allocate inputs
         batch = np.zeros((batch_size, 3), dtype=np.uint32)
         pos_neighbor = np.zeros((batch_size, self._max_user_neighbors), dtype=np.int32)
