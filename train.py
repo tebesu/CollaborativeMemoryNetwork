@@ -53,14 +53,12 @@ class Config(BaseConfig):
     optimizer = FLAGS.optimizer
     tol = 1e-5
     neg_count = FLAGS.neg
-    verbose = FLAGS.verbose
     optimizer_params = FLAGS.optimizer_params
     grad_clip = 5.0
     decay_rate = 0.9
     learning_rate = FLAGS.learning_rate
     pretrain = FLAGS.pretrain
     max_neighbors = -1
-    attention = not FLAGS.no_attention
 
 config = Config()
 
@@ -130,6 +128,7 @@ s = ""
 scores, out = get_model_scores(sess, dataset.test_data, dataset.item_users_list, model.input_users, model.input_items,
                    model.input_neighborhoods, model.input_neighborhood_lengths,
                    model.dropout, model.score, config.max_neighbors, True)
+
 for k in EVAL_AT:
     hr, ndcg = get_eval(scores, len(scores[0])-1, k)
     hrs.append(hr)
