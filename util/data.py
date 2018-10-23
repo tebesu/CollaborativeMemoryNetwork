@@ -59,8 +59,7 @@ class Dataset(object):
         if len(positive_items) >= self.item_count:
             raise ValueError("The User has rated more items than possible %s / %s" % (
                 len(positive_items), self.item_count))
-
-        while n in positive_items:
+        while n in positive_items or n not in self.item_users:
             n = self._sample_item()
         return n
 
