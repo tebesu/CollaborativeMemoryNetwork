@@ -21,7 +21,7 @@ parser.add_argument('-b', '--batch_size', help='Batch Size', type=int, default=1
 parser.add_argument('-e', '--embedding', help='Embedding Size', type=int, default=50)
 parser.add_argument('--dataset', help='path to npz file', type=str, required=True)
 parser.add_argument('-n', '--neg', help='Negative Samples Count', type=int, default=4)
-parser.add_argument('--l2', help='l2 Regularization', type=float, default=0.0001)
+parser.add_argument('--l2', help='l2 Regularization', type=float, default=0.001)
 parser.add_argument('-o', '--output', help='save filename for trained embeddings', type=str,
                     required=True)
 FLAGS = parser.parse_args()

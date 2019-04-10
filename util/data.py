@@ -5,8 +5,13 @@ from collections import defaultdict
 class Dataset(object):
 
     def __init__(self, filename):
+        """
+        Wraps dataset and produces batches for the model to consume
+
+        :param filename: path to training data for npz file
+        """
         self._data = np.load(filename)
-        self.train_data = self._data['train_data']
+        self.train_data = self._data['train_data'][:, :2]
         self.test_data = self._data['test_data'].tolist()
         self._train_index = np.arange(len(self.train_data), dtype=np.uint)
         self._n_users, self._n_items = self.train_data.max(axis=0) + 1
@@ -14,14 +19,14 @@ class Dataset(object):
         # Neighborhoods
         self.user_items = defaultdict(set)
         self.item_users = defaultdict(set)
-        self.item_users_list = defaultdict(list)
         for u, i in self.train_data:
             self.user_items[u].add(i)
             self.item_users[i].add(u)
-            # Get a list version so we do not need to perform type casting
-            self.item_users_list[i].append(u)
-
+        # Get a list version so we do not need to perform type casting
+        self.item_users_list = {k: list(v) for k, v in self.item_users.items()}
         self._max_user_neighbors = max([len(x) for x in self.item_users.values()])
+        self.user_items = dict(self.user_items)
+        self.item_users = dict(self.item_users)
 
     @property
     def train_size(self):
@@ -33,10 +38,16 @@ class Dataset(object):
 
     @property
     def user_count(self):
+        """
+        Number of users in dataset
+        """
         return self._n_users
 
     @property
     def item_count(self):
+        """
+        Number of items in dataset
+        """
         return self._n_items
 
     def _sample_item(self):
@@ -74,7 +85,20 @@ class Dataset(object):
                 self._examples[idx, :] = [user_idx, item_idx, neg_item_idx]
                 idx += 1
 
-    def get_data(self, batch_size, neighborhood, neg_count):
+    def get_data(self, batch_size: int, neighborhood: bool, neg_count: int):
+        """
+        Batch data together as (user, item, negative item), pos_neighborhood,
+        length of neighborhood, negative_neighborhood, length of negative neighborhood
+
+        if neighborhood is False returns only user, item, negative_item so we
+        can reuse this for non-neighborhood-based methods.
+
+        :param batch_size: size of the batch
+        :param neighborhood: return the neighborhood information or not
+        :param neg_count: number of negative samples to uniformly draw per a pos
+                          example
+        :return: generator
+        """
         # Allocate inputs
         batch = np.zeros((batch_size, 3), dtype=np.uint32)
         pos_neighbor = np.zeros((batch_size, self._max_user_neighbors), dtype=np.int32)
@@ -94,7 +118,7 @@ class Dataset(object):
 
                 # Get neighborhood information
                 if neighborhood:
-                    if len(self.item_users[item_idx]) > 0:
+                    if len(self.item_users.get(item_idx, [])) > 0:
                         pos_length[idx] = len(self.item_users[item_idx])
                         pos_neighbor[idx, :pos_length[idx]] = self.item_users_list[item_idx]
                     else:
@@ -102,7 +126,7 @@ class Dataset(object):
                         pos_length[idx] = 1
                         pos_neighbor[idx, 0] = item_idx
 
-                    if len(self.item_users[neg_item_idx]) > 0:
+                    if len(self.item_users.get(neg_item_idx, [])) > 0:
                         neg_length[idx] = len(self.item_users[neg_item_idx])
                         neg_neighbor[idx, :neg_length[idx]] = self.item_users_list[neg_item_idx]
                     else:

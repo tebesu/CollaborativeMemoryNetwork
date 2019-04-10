@@ -26,7 +26,7 @@ def get_model_scores(sess, test_data, neighborhood, input_user_handle, input_ite
                                                           dtype=np.int32), np.ones(len(neg) + 1, dtype=np.int32)
 
             for _idx, item in enumerate(item_indices):
-                _len = min(len(neighborhood[item]), max_neighbors)
+                _len = min(len(neighborhood.get(item, [])), max_neighbors)
                 if _len > 0:
                     neighborhoods[_idx, :_len] = neighborhood[item][:_len]
                     neighborhood_length[_idx] = _len
