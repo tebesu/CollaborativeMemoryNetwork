@@ -41,8 +41,7 @@ python pretrain.py --gpu 0 --dataset data/citeulike-a.npz --output pretrain/cite
 **Requirements**
 * Python 3.6
 * TensorFlow 1.4+ 
-* dm-sonnet <= 1.25
- * (tensorflow_probability==0.7 works with dm-sonnet 1.25)
+* dm-sonnet <= 1.25 (tensorflow_probability==0.7 works with dm-sonnet 1.25)
 * tqdm 
 
 
